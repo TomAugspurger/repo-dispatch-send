@@ -1,0 +1,23 @@
+---
+name: "release"
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the master branch
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v1.0.0
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repository: TomAugspurger/repository-dispatch-recv
+          event-type: pangeo-release
+          client-payload: '{"tag": "${{ steps.get_version.outputs.VERSION }}"}'
